@@ -9,6 +9,10 @@ Global Particle Swarm Optimization for High Dimension Numerical Functions Analys
 Journal of Applied Mathematics. 2014. 1-14. 10.1155/2014/329193. 
 '''
 
+''' TODO 
+    - Writing tests
+'''
+
 class TestFunction(Problem):
 
     dim = 3
@@ -24,8 +28,8 @@ class TestFunction(Problem):
         v, c = self.get_results()
         string = '\n' + '-'*40 + '\n'
         string += f'name: {self.name}\n'
-        string += 'vector: ' + ' '.join([f'{xi:.3f}'for xi in v])
-        string += f'\ncosts: ' + ' '.join([f'{xi:.3f}'for xi in c]) + '\n'
+        string += 'vector: ' + ' '.join([f'{xi:.7f}'for xi in v]) + '\n'
+        string += f'costs: ' + ' '.join([f'{xi:.7f}'for xi in c]) + '\n'
         string += "-"*40 + '\n'
         return string
 
@@ -59,8 +63,8 @@ class TestFunctionF2(TestFunction):
     def evaluate(self, individual):
         x = individual.vector
         f = 0.0
-        for i in range(self.dim):
-            f += (x[i] ** 2) * 10e6 ** (i / (self.dim - 1))
+        for i, xi in enumerate(individual.vector):
+            f += (xi ** 2) * 10e6 ** (i / (self.dim - 1))
         return [f]
 
 
@@ -116,10 +120,9 @@ class TestFunctionF5(TestFunction):
         self.costs = [{'name': 'F5', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
-        for i in range(1, self.dim + 1):
-            f += (x[i - 1] + 0.5) ** 2
+        for xi in individual.vector:
+            f += (xi + 0.5) ** 2
 
         return [f]
 
@@ -136,13 +139,12 @@ class TestFunctionF6(TestFunction):
         self.costs = [{'name': 'F6', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
         lambda1 = 0.0
         lambda2 = 0.0
-        for i in range(self.dim):
-            lambda1 += x[i] ** 2
-            lambda2 += cos(2 * pi * x[i])
+        for xi in individual.vector:
+            lambda1 += xi ** 2
+            lambda2 += cos(2 * pi * xi)
 
         lambda1 *= -0.2 * sqrt(1 / self.dim)
         lambda2 *= 1 / self.dim
@@ -185,11 +187,10 @@ class TestFunctionF8(TestFunction):
         self.costs = [{'name': 'F8', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
 
-        for i in range(self.dim):
-            f += x[i] **2 - 10 * cos(2 * pi * x[i]) + 10
+        for xi in individual.vector:
+            f += xi **2 - 10 * cos(2 * pi * xi) + 10
 
         return [f]
 
@@ -206,15 +207,14 @@ class TestFunctionF9(TestFunction):
         self.costs = [{'name': 'F9', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
 
-        for i in range(self.dim):
+        for xi in individual.vector:
             yi = 0.0
-            if abs(x[i]) < 0.5:
-                yi = x[i]
+            if abs(xi) < 0.5:
+                yi = xi
             else:
-                yi = round(2 * x[i]) / 2
+                yi = round(2 * xi) / 2
 
             f += yi**2 - 10 * cos(2 * pi * yi) + 10
 
@@ -233,11 +233,10 @@ class TestFunctionF10(TestFunction):
         self.costs = [{'name': 'F10', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
 
-        for i in range(self.dim):
-            f += x[i] ** 4 - 16 * x[i] ** 2 + 5 * x[i]
+        for xi in individual.vector:
+            f += xi ** 4 - 16 * xi ** 2 + 5 * xi
 
         return [1 / self.dim * f]
 
@@ -254,11 +253,10 @@ class TestFunctionF11(TestFunction):
         self.costs = [{'name': 'F11', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
 
-        for i in range(self.dim):
-            f += abs(x[i] * sin(x[i]) + 0.1 * x[i])
+        for xi in individual.vector: 
+            f += abs(xi * sin(xi + 0.1 * xi))
 
         return [f]
 
@@ -275,11 +273,10 @@ class TestFunctionF12(TestFunction):
         self.costs = [{'name': 'F12', 'criteria': 'minimize'}]
 
     def evaluate(self, individual):
-        x = individual.vector
         f = 0.0
 
-        for i in range(self.dim):
-            f += (x[i] - 1) ** 2 * abs(1 + x[i] * sin(3*pi*x[i])**2)
+        for xi in individual.vector:
+            f += (xi - 1) ** 2 * abs(1 + xi * sin(3*pi*xi)**2)
 
         return [f]
 
@@ -289,7 +286,7 @@ if __name__ == '__main__':
     
     TestFunction.dim = 3
     
-    problems = [
+    testfunctions = [
             TestFunctionF1(),
             TestFunctionF2(),
             TestFunctionF3(),
@@ -304,7 +301,7 @@ if __name__ == '__main__':
             TestFunctionF12(),
             ]
 
-    for problem in problems:
-        algorithm = OMOPSO(problem)
+    for test in testfunctions:
+        algorithm = OMOPSO(test)
         algorithm.run()
-        print(problem)
+        print(test)
