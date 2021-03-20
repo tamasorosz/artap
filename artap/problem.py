@@ -2,8 +2,8 @@
  Module is dedicated to describe optimization problem.
 """
 
-from datastore import SqliteDataStore, DummyDataStore
-from utils import ConfigDictionary
+from artap.datastore import SqliteDataStore, DummyDataStore
+from artap.utils import ConfigDictionary
 from artap.surrogate import SurrogateModelEval
 from abc import abstractmethod
 

@@ -3,7 +3,7 @@ import sqlite3
 import os
 import json
 
-from individual import Individual
+from artap.individual import Individual
 
 
 class DummyDataStore:

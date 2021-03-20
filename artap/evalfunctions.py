@@ -11,6 +11,7 @@ Journal of Applied Mathematics. 2014. 1-14. 10.1155/2014/329193.
 
 ''' TODO 
     - Writing tests
+    - changeable population size, nb_iteration
 '''
 
 class TestFunction(Problem):
@@ -285,14 +286,14 @@ if __name__ == '__main__':
     from artap.algorithm_swarm import OMOPSO
     
     TestFunction.dim = 3
-    
+
     testfunctions = [
             TestFunctionF1(),
             TestFunctionF2(),
             TestFunctionF3(),
             TestFunctionF4(),
             TestFunctionF5(),
-            TestFunctionF5(),
+            TestFunctionF6(),
             TestFunctionF7(),
             TestFunctionF8(),
             TestFunctionF9(),
@@ -305,3 +306,4 @@ if __name__ == '__main__':
         algorithm = OMOPSO(test)
         algorithm.run()
         print(test)
+    
