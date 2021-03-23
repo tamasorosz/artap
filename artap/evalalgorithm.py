@@ -1,17 +1,19 @@
 from abc import abstractmethod
-import operator
-from types import SimpleNamespace
 from artap.results import Results
 from artap.algorithm import Algorithm
 from artap import evalfunctions as ef
 import statistics
+from types import SimpleNamespace
+
 '''
 TODO:
     - tests
     - abstracting
     - kwargs
-    - stat. functions for vectors
+    - min,max,avg,std / dimension for vectors
 '''
+
+
 class AlgorithmEvaluation:
 
     def __init__(self, algorithm: Algorithm, dimension=3, **kwargs):
@@ -20,6 +22,7 @@ class AlgorithmEvaluation:
         self.algorithm = algorithm
 
         self.results = {}
+        self.testresults = list()
         self.nb_testrun = kwargs.pop("nb_testrun", 5)
         self.nb_iteration = kwargs.pop("nb_iter", 100)
         self.nb_individual = kwargs.pop("nb_individual", 10)
@@ -29,32 +32,32 @@ class AlgorithmEvaluation:
         self.set_dimension(self.dimension)
 
         for test in ef.testfactory:
-            costs = list()
-            vectors = list()
-
+            self.testresults.clear()
             for i in range(self.nb_testrun):
                 problem = test(dimension=self.dimension)
                 alg = self.algorithm(problem)
                 problem.logger.disabled = True
                 alg.run()
-                c, v = self.get_results(problem)
-                costs.append(c)
-                vectors.append(v)
-
-            self.results.setdefault(problem.name, SimpleNamespace())
-            key = problem.name
-            self.results[key].name = problem.name
-            self.results[key].best_cost = self.get_best_cost(costs)
-            self.results[key].worst_cost = self.get_worst_cost(costs)
-            self.results[key].avg_cost = self.get_avg_cost(costs)
-            self.results[key].std_cost = self.get_std_cost(costs)
+                self.testresults.append(self.get_results(problem))            
             
-            '''
-            self.results[key].best_vector = self.get_best_vector(vectors)
-            self.results[key].worst_vector = self.get_worst_vector(vectors)
-            self.results[key].avg_vector = self.get_avg_vector(vectors)
-            self.results[key].std_vector = self.get_std_vector(vectors)
-            '''
+            key = problem.name
+            self.results.setdefault(key, SimpleNamespace())
+            self.sort_testresults() # !!!!!!!
+            self.results[key].name = problem.name
+
+            # statistics
+            self.set_min_costs(key)
+            self.set_max_costs(key)
+            self.set_avg_costs(key)
+            self.set_std_costs(key)
+
+
+            self.set_min_vector(key)
+            self.set_max_vector(key)
+            #self.set_d_min_vector(key)
+            #self.set_d_max_vector(key)
+            #self.set_d_avg_vector(key)
+            #self.set_d_std_vector(key)
 
             print(problem.name, 'Done')
             print(self.results[key])
@@ -72,20 +75,54 @@ class AlgorithmEvaluation:
         v = list(res.vector)
         return c, v
 
-    def get_best_cost(self, costs):
-        return min(costs, key=lambda ci: ci[0])
+    @abstractmethod
+    def sort_testresults(self):
+        '''
+        - It should be an inplace sort for self.testresults.
+        - self.testresults is a list of (costs_i, vector_i) tuples
+        - costs_i: list
+        - vector_i: list
+        - after sort:
+            self.testresults[0] element has the lowest fitness
+            self.testresults[-1] element has the highest fitness
+        '''
+        ...
 
-    def get_worst_cost(self, costs):
-        return max(costs, key=lambda ci: ci[0])
+    @abstractmethod
+    def set_min_costs(self, key):
+        ...
 
-    def get_avg_cost(self, costs):
-        return statistics.fmean(map(operator.itemgetter(0), costs))
+    @abstractmethod
+    def set_max_costs(self, key):
+        ...
+        
+    @abstractmethod
+    def set_avg_costs(self, key):
+        ...
 
-    def get_std_cost(self, costs):
-        return statistics.stdev(map(operator.itemgetter(0), costs))
-    
+    @abstractmethod
+    def set_std_costs(self, key):
+        ...
+
+    @abstractmethod
+    def set_min_vector(self, key):
+        ...
+
+    @abstractmethod
+    def set_max_vector(self, key):
+        ...
+
+
     def __call__(self):
         self.runtests()
+
+class SingleObjAlgorithmEvaluation(AlgorithmEvaluation):
+    pass
+
+
+class MultiObjAlgorithmEvaluation(AlgorithmEvaluation):
+    pass
+
 
 if __name__=='__main__':
     # for testing
@@ -94,5 +131,5 @@ if __name__=='__main__':
 
     ef.testfactory.append(Ackley)
 
-    test1 = AlgorithmEvaluation(OMOPSO, 3)
+    test1 = SingleObjAlgorithmEvaluation(OMOPSO, 3)
     test1()

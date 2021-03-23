@@ -11,6 +11,17 @@ Global Particle Swarm Optimization for High Dimension Numerical Functions Analys
 Journal of Applied Mathematics. 2014. 1-14. 10.1155/2014/329193. 
 '''
 
+'''
+TEMPLATE for a testfunction:
+
+def fx(x):
+    dim = len(x)
+    f = 0.0
+    for xi in x:
+        f += 0
+    return [f]
+'''
+
 ''' TODO 
     - Writing tests
 '''
@@ -60,7 +71,7 @@ def register(name: str, ranges: tuple):
             
             @functools.wraps(func)
             def evaluate(self, individual):
-                return [func(individual.vector)]
+                return func(individual.vector)
 
             def __hash__(self):
                 return id(self)
@@ -75,7 +86,7 @@ def register(name: str, ranges: tuple):
 
 @register(name='F1', ranges=(-100.0, 100.0))
 def f1(x):
-    return sum(map(lambda xi: xi**2, x))
+    return [sum(map(lambda xi: xi**2, x))]
 
 @register("F2", (-100.0, 100.0))
 def f2(x):
@@ -84,7 +95,7 @@ def f2(x):
     for i in range(dim):
         f += (x[i] ** 2) * 10e6 ** (i / (dim - 1))
 
-    return f
+    return [f]
 
 
 @register('F3', (-100.0, 100.0))
@@ -94,7 +105,7 @@ def f3(x):
     for i in range(1, dim + 1):
         f += i * x[i - 1] ** 2
 
-    return f
+    return [f]
 
 
 @register('F4', (-10.0, 10.0))
@@ -102,7 +113,7 @@ def f4(x):
     f = 0.0
     for i, xi in enumerate(x):
         f += abs(xi) ** (i + 1)
-    return f
+    return [f]
 
 
 @register('F5', (-10.0, 10.0))
@@ -112,7 +123,7 @@ def f5(x):
     for xi in x:
         f += (xi + 0.5) ** 2
 
-    return f
+    return [f]
 
 
 # debug
@@ -130,7 +141,7 @@ def f6(x):
     lambda2 *= 1 / dim
 
     f = -20 * exp(lambda1) - exp(lambda2) + 20 + e
-    return f
+    return [f]
 
 
 @register('F7', (-10.0, 10.0))
@@ -140,7 +151,7 @@ def f7(x):
     for i in range(1, dim):
         f += 100 * (x[i] - x[i-1])**2 + (x[i-1]-1)**20
 
-    return f
+    return [f]
 
 @register('F8', (-5.12, 5.12))
 def f8(x):
@@ -148,7 +159,7 @@ def f8(x):
     for xi in x:
         f += xi **2 - 10 * cos(2 * pi * xi) + 10
 
-    return f
+    return [f]
 
 @register('F9', (-5.12, 5.12))
 def f9(x):
@@ -163,7 +174,7 @@ def f9(x):
 
         f += yi**2 - 10 * cos(2 * pi * yi) + 10
 
-    return f
+    return [f]
 
 # min: -78.3324
 @register('F10', (-5.0, 5.0))
@@ -172,14 +183,14 @@ def f10(x):
     f = 0.0
     for xi in x:
         f += xi ** 4 - 16 * xi ** 2 + 5 * xi
-    return f / dim
+    return [f / dim]
 
 @register('F11', (-10.0, 10.0))
 def f11(x):
     f = 0.0
     for xi in x:
         f += abs(xi * sin(xi) + 0.1 * xi)
-    return f
+    return [f]
 
 @register('F12', (-10.0, 10.0))
 def f12(x):
@@ -187,7 +198,13 @@ def f12(x):
     for xi in x:
         f += (xi - 1) ** 2 * abs(1 + xi * sin(3*pi*xi)**2)
 
-    return f
+    return [f]
+
+@register('FMultiobj', (-1.0, 1.0))
+def fm(x):
+    x0, x1, x2 = x
+
+    return [(x0+1)**2, (x1-x0+2*x2)**2 - 1.0]
 
 if __name__ == '__main__':
     # for testing
