@@ -5,10 +5,16 @@ from artap.results import Results
 from artap.algorithm import Algorithm
 from artap import evalfunctions as ef
 import statistics
-
+'''
+TODO:
+    - tests
+    - abstracting
+    - kwargs
+    - stat. functions for vectors
+'''
 class AlgorithmEvaluation:
 
-    def __init__(self, algorithm, dimension=3, **kwargs):
+    def __init__(self, algorithm: Algorithm, dimension=3, **kwargs):
         self.dimension = dimension
         self.set_dimension(self.dimension)
         self.algorithm = algorithm
@@ -19,7 +25,6 @@ class AlgorithmEvaluation:
         self.nb_individual = kwargs.pop("nb_individual", 10)
 
     def runtests(self):
-        from IPython import embed
         self.results.clear()
         self.set_dimension(self.dimension)
 
@@ -36,7 +41,6 @@ class AlgorithmEvaluation:
                 costs.append(c)
                 vectors.append(v)
 
-            
             self.results.setdefault(problem.name, SimpleNamespace())
             key = problem.name
             self.results[key].name = problem.name
@@ -68,19 +72,15 @@ class AlgorithmEvaluation:
         v = list(res.vector)
         return c, v
 
-    @abstractmethod
     def get_best_cost(self, costs):
         return min(costs, key=lambda ci: ci[0])
 
-    @abstractmethod
     def get_worst_cost(self, costs):
         return max(costs, key=lambda ci: ci[0])
 
-    @abstractmethod
     def get_avg_cost(self, costs):
         return statistics.fmean(map(operator.itemgetter(0), costs))
 
-    @abstractmethod
     def get_std_cost(self, costs):
         return statistics.stdev(map(operator.itemgetter(0), costs))
     
