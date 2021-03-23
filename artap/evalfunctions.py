@@ -13,15 +13,16 @@ Journal of Applied Mathematics. 2014. 1-14. 10.1155/2014/329193.
 
 ''' TODO 
     - Writing tests
-    - changeable population size, nb_iteration
 '''
 
 testfactory = deque()
 
 class TestFunctionBase(Problem):
 
-    dim = 3
+    dimension = 3
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def get_results(self):
         res = Results(self).find_optimum()
@@ -46,7 +47,7 @@ def register(name: str, ranges: tuple):
                 self.logger.disabled = True
                 self.name = name
                 self.parameters = list()
-                for dim in range(1, TestFunctionBase.dim + 1):
+                for dim in range(1, TestFunctionBase.dimension + 1):
                     self.parameters.append({
                         'name': f'x_{dim}',
                         'bounds': ranges
@@ -79,7 +80,7 @@ def f1(x):
 @register("F2", (-100.0, 100.0))
 def f2(x):
     f = 0.0
-    dim = TestFunctionBase.dim
+    dim = len(x)
     for i in range(dim):
         f += (x[i] ** 2) * 10e6 ** (i / (dim - 1))
 
@@ -89,7 +90,8 @@ def f2(x):
 @register('F3', (-100.0, 100.0))
 def f3(x):
     f = 0.0
-    for i in range(1, TestFunctionBase.dim + 1):
+    dim = len(x)
+    for i in range(1, dim + 1):
         f += i * x[i - 1] ** 2
 
     return f
@@ -98,16 +100,17 @@ def f3(x):
 @register('F4', (-10.0, 10.0))
 def f4(x):
     f = 0.0
-    for i in range(1, TestFunctionBase.dim + 1):
-        f += abs(x[i - 1]) ** (i + 1)
+    for i, xi in enumerate(x):
+        f += abs(xi) ** (i + 1)
     return f
 
 
 @register('F5', (-10.0, 10.0))
 def f5(x):
     f = 0.0
-    for i in range(1, TestFunctionBase.dim + 1):
-        f += (x[i - 1] + 0.5) ** 2
+    dim = len(x)
+    for xi in x:
+        f += (xi + 0.5) ** 2
 
     return f
 
@@ -115,24 +118,26 @@ def f5(x):
 # debug
 @register('F6', (-32.0, 32.0))
 def f6(x):
+    dim = len(x)
     f = 0.0
     lambda1 = 0.0
     lambda2 = 0.0
-    for i in range(TestFunctionBase.dim):
-        lambda1 += x[i] ** 2
-        lambda2 += cos(2 * pi * x[i])
+    for xi in x:
+        lambda1 += xi ** 2
+        lambda2 += cos(2 * pi * xi)
 
-        lambda1 *= -0.2 * sqrt(1 / TestFunctionBase.dim)
-        lambda2 *= 1 / TestFunctionBase.dim
+    lambda1 *= -0.2 * sqrt(1 / dim)
+    lambda2 *= 1 / dim
 
-        f = -20 * exp(lambda1) - exp(lambda2) + 20 + e
+    f = -20 * exp(lambda1) - exp(lambda2) + 20 + e
     return f
 
 
 @register('F7', (-10.0, 10.0))
 def f7(x):
+    dim = len(x)
     f = 0.0
-    for i in range(1, TestFunctionBase.dim):
+    for i in range(1, dim):
         f += 100 * (x[i] - x[i-1])**2 + (x[i-1]-1)**20
 
     return f
@@ -147,25 +152,27 @@ def f8(x):
 
 @register('F9', (-5.12, 5.12))
 def f9(x):
+    dim = len(x)
     f = 0.0
-    for i in range(TestFunctionBase.dim):
+    for xi in x:
         yi = 0.0
-        if abs(x[i]) < 0.5:
-            yi = x[i]
+        if abs(xi) < 0.5:
+            yi = xi
         else:
-            yi = round(2 * x[i]) / 2
+            yi = round(2 * xi) / 2
 
         f += yi**2 - 10 * cos(2 * pi * yi) + 10
 
     return f
 
-#debug
+# min: -78.3324
 @register('F10', (-5.0, 5.0))
 def f10(x):
+    dim = len(x)
     f = 0.0
     for xi in x:
         f += xi ** 4 - 16 * xi ** 2 + 5 * xi
-    return f / TestFunctionBase.dim
+    return f / dim
 
 @register('F11', (-10.0, 10.0))
 def f11(x):
@@ -185,12 +192,12 @@ def f12(x):
 if __name__ == '__main__':
     # for testing
     from artap.algorithm_swarm import OMOPSO
-    TestFunctionBase.dim = 3
+    from artap.benchmark_functions import Ackley
 
-    l = range(3)
-    print(f1(l))
+    testfactory.append(Ackley)
+
     for test in testfactory:
-        problem = test()
+        problem = test(dimension=3)
         alg = OMOPSO(problem)
         alg.run()
         print(problem)
