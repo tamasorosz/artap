@@ -55,7 +55,7 @@ def register(name: str, ranges: tuple):
     def decorator(func):
         class TestFunction(TestFunctionBase):
             def set(self, **kwargs):
-                self.logger.disabled = True
+                #self.logger.disabled = True
                 self.name = name
                 self.parameters = list()
                 for dim in range(1, TestFunctionBase.dimension + 1):
@@ -199,12 +199,6 @@ def f12(x):
         f += (xi - 1) ** 2 * abs(1 + xi * sin(3*pi*xi)**2)
 
     return [f]
-
-@register('FMultiobj', (-1.0, 1.0))
-def fm(x):
-    x0, x1, x2 = x
-
-    return [(x0+1)**2, (x1-x0+2*x2)**2 - 1.0]
 
 if __name__ == '__main__':
     # for testing

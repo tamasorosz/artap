@@ -26,6 +26,7 @@ _build
 3rdparty/nlopt2/
 artap/examples/simple_optimization/pokus/
 artap/examples/simple_optimization/problem.json
-
+res.json
+venv
 
 
